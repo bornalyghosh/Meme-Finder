@@ -1,0 +1,23 @@
+# Ignore environment files
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pkl
+
+# Jupyter/IPython
+.ipynb_checkpoints
+
+# VSCode
+.vsscode/
+.vscode-server/
+.vscode-server-insiders/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Extracted Dataset and large data
+images/
+data/meme_embeddings.pkl
