@@ -14,17 +14,17 @@ from tqdm import tqdm
 import google.generativeai as genai
 from google.generativeai import embed_content
 
-# Load environment variables
-load_dotenv()
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-if not GOOGLE_API_KEY:
-    raise ValueError("API key not found. Please set the GOOGLE_API_KEY environment variable.")
-genai.configure(api_key=GOOGLE_API_KEY)
-
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 EMBEDDING_FILE = BASE_DIR.parent / 'data' / 'meme_embeddings.pkl'
 IMAGE_DIR = BASE_DIR.parent / 'images'
+
+# Load environment variables
+load_dotenv(BASE_DIR.parent / '.env')
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+if not GOOGLE_API_KEY:
+    raise ValueError("API key not found. Please set the GOOGLE_API_KEY environment variable.")
+genai.configure(api_key=GOOGLE_API_KEY)
 
 # Load embedded memes
 with open(EMBEDDING_FILE, 'rb') as f:
@@ -50,6 +50,7 @@ query_embedding = normalize(np.array(response["embedding"]))
 
 # Find top-K similar memes
 top_k = 5
+# top_results = sorted(embedded_memes, key=lambda x: cosine_similarity(query_embedding, np.array(x["embedding"])), reverse=True)[:top_k]
 similarities = []
 
 for meme in embedded_memes:
@@ -66,7 +67,7 @@ print("\nTop Matches\n")
 plt.figure(figsize=(15, 6))
 for i, (score, meme) in enumerate(top_results):
     print(f"{i + 1}. Filename: {meme['filename']}")
-    print(f"\tSimilarity Score: {score:.4f}")
+    # print(f"\tSimilarity Score: {score:.4f}")
     print(f"\tSimilarity Text: {meme['text']}\n")
 
     # Show image
