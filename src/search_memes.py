@@ -3,7 +3,10 @@ import pickle
 import json
 import time
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 
+from PIL import Image
 from pathlib import Path
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -32,30 +35,51 @@ def cosine_similarity(a, b):
     b = np.array(b)
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-def embed_query(text):
-    response = embed_content(
-        model="models/embedding-001",
-        content=text,
-        task_type="retrieval_document"
-    )
-    return response["embedding"]
+def normalize(v):
+    return v / np.linalg.norm(v)
 
-def search_memes(query, top_k=5):
-    query_embed = embed_query(query)
-    scored_memes = []
+query = input("Enter your search prompt: ")
 
-    for meme in embedded_memes:
-        sim = cosine_similarity(query_embed, meme["embedding"])
-        scored_memes.append((sim, meme))
+response = embed_content(
+    model="models/embedding-001",
+    content=query,
+    task_type="retrieval_document"
+)
 
-    top_results = sorted(scored_memes, key=lambda x: x[0], reverse=True)[:top_k]
-    return top_results
+query_embedding = normalize(np.array(response["embedding"]))
 
-if __name__ == "__main__":
-    print("Meme Finder - Semantic Search Engine")
-    query = input("Enter your search: ").strip()
+# Find top-K similar memes
+top_k = 5
+similarities = []
 
-    print("\nTop Matches\n")
-    for score, meme in search_memes(query):
-        print(f"{meme['filename']} | Score: {score: 0.4f}")
-        print(f"{meme['text'][:300].strip()}...\n")
+for meme in embedded_memes:
+    meme_vector = normalize(np.array(meme["embedding"]))
+    sim = np.dot(query_embedding, meme_vector)
+    similarities.append((sim, meme))
+
+# Sort by similarity
+similarities.sort(reverse=True, key=lambda x: x[0])
+top_results = similarities[:top_k]
+
+# Display results
+print("\nTop Matches\n")
+plt.figure(figsize=(15, 6))
+for i, (score, meme) in enumerate(top_results):
+    print(f"{i + 1}. Filename: {meme['filename']}")
+    print(f"\tSimilarity Score: {score:.4f}")
+    print(f"\tSimilarity Text: {meme['text']}\n")
+
+    # Show image
+    if os.path.exists(IMAGE_DIR / meme["filename"]):
+        image_path = IMAGE_DIR / meme["filename"]
+        image = Image.open(image_path)
+        
+        plt.subplot(1, top_k, i + 1)
+        plt.imshow(image)
+        plt.axis('off')
+        plt.title(f"{meme['filename'][:15]}...", fontsize=8)
+    else:
+        print(f"Image {meme['filename']} could not be found.\n")
+
+plt.tight_layout()
+plt.show()
