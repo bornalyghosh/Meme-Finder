@@ -21,3 +21,4 @@ Thumbs.db
 # Extracted Dataset and large data
 images/
 data/meme_embeddings.pkl
+data/prompt_cache.json

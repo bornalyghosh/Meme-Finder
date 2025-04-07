@@ -14,6 +14,8 @@ from tqdm import tqdm
 import google.generativeai as genai
 from google.generativeai import embed_content
 
+from prompt_rewriter import rewrite_promp_with_gemini
+
 # Paths
 BASE_DIR = Path(__file__).resolve().parent
 EMBEDDING_FILE = BASE_DIR.parent / 'data' / 'meme_embeddings.pkl'
@@ -38,7 +40,8 @@ def cosine_similarity(a, b):
 def normalize(v):
     return v / np.linalg.norm(v)
 
-query = input("Enter your search prompt: ")
+raw_input = input("Enter your search prompt: ")
+query = rewrite_promp_with_gemini(raw_input)
 
 response = embed_content(
     model="models/embedding-001",
@@ -49,7 +52,7 @@ response = embed_content(
 query_embedding = normalize(np.array(response["embedding"]))
 
 # Find top-K similar memes
-top_k = 5
+top_k = 7
 # top_results = sorted(embedded_memes, key=lambda x: cosine_similarity(query_embedding, np.array(x["embedding"])), reverse=True)[:top_k]
 similarities = []
 
@@ -64,7 +67,7 @@ top_results = similarities[:top_k]
 
 # Display results
 print("\nTop Matches\n")
-plt.figure(figsize=(15, 6))
+plt.figure(figsize=(12, 6))
 for i, (score, meme) in enumerate(top_results):
     print(f"{i + 1}. Filename: {meme['filename']}")
     # print(f"\tSimilarity Score: {score:.4f}")
