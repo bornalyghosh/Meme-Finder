@@ -10,18 +10,19 @@ from tqdm import tqdm
 
 import google.generativeai as genai
 
+# File paths
 BASE_DIR = Path(__file__).resolve().parent
+data_dir = BASE_DIR.parent / 'data'
+input_json = data_dir / 'meme_texts.json'
+output_pkl = data_dir / 'meme_embeddings.pkl'
+
+# Load environment
 load_dotenv(BASE_DIR.parent / '.env')
 api_key = os.getenv('GOOGLE_API_KEY')
 if not api_key:
     raise ValueError("API key not found. Please set the GOOGLE_API_KEY environment variable.")
 
 configure(api_key=api_key)
-
-# File paths
-data_dir = BASE_DIR.parent / 'data'
-input_json = data_dir / 'meme_texts.json'
-output_pkl = data_dir / 'meme_embeddings.pkl'
 
 # Load meme texts from JSON file
 with open(input_json, 'r', encoding='utf-8') as f:
