@@ -14,7 +14,7 @@ import google.generativeai as genai
 BASE_DIR = Path(__file__).resolve().parent
 data_dir = BASE_DIR.parent / 'data'
 input_json = data_dir / 'meme_texts.json'
-output_pkl = data_dir / 'meme_embeddings.pkl'
+output_pkl = data_dir / 'text_embeddings.pkl'
 
 # Load environment
 load_dotenv(BASE_DIR.parent / '.env')
@@ -50,10 +50,10 @@ for idx, (file_name, text) in enumerate(tqdm(meme_data.items(), desc='Processing
             "text": text,
             "embedding": embedding
         })
-        if idx % 100 == 0:
-            print(f"Embedded {idx} / {len(meme_data)}")
+        if idx and idx % 1000 == 0:
+            print(f"\nEmbedded {idx} / {len(meme_data)}")
 
-        time.sleep(0.1) # To avoid hitting rate limits
+        time.sleep(0.5) # To avoid hitting rate limits
 
     except Exception as e:
         print(f"Error embedding {file_name}: {e}")

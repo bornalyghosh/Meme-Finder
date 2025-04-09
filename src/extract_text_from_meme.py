@@ -2,9 +2,11 @@ import os
 import json
 import pytesseract
 
-from PIL import Image
+from PIL import Image, ImageFile
 from pathlib import Path
 from tqdm import tqdm
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Set the path to the Tesseract-OCR executable
 # Note: Adjust this path according to your Tesseract installation location
