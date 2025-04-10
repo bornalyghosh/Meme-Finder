@@ -28,23 +28,34 @@ configure(api_key=api_key)
 with open(input_json, 'r', encoding='utf-8') as f:
     meme_data = json.load(f)
 
-# Embed and collect meme texts
+# Embed and collect image texts
 emebedded_memes = []
 
 print(f"Embedding {len(meme_data)} meme texts...")
 
-for idx, (file_name, text) in enumerate(tqdm(meme_data.items(), desc='Processing Memes')):
+# Retry embedding if it fails
+def embed_with_retry(text, retries=3, delay=5):
+    for attempt in range(retries):
+        try:
+            response = genai.embed_content(
+                model="models/embedding-001",
+                content=text,
+                task_type="retrieval_document"
+            )
+            return response["embedding"]
+        except Exception as e:
+            print(f"Attempt {attempt + 1} / {retries} failed: {e}")
+            time.sleep(delay)
+    raise Exception("All attempts to embed text failed.")
+
+
+for idx, (file_name, text) in enumerate(tqdm(meme_data.items(), desc='Embedding Texts')):
     text = text.strip()
 
     if not text:
         continue
     try:
-        response = embed_content(
-            model="models/embedding-001",
-            content=text,
-            task_type="retrieval_document"
-        )
-        embedding = response["embedding"]
+        embedding = embed_with_retry(text) # Getting Embedding
         emebedded_memes.append({
             "filename": file_name,
             "text": text,
