@@ -1,7 +1,6 @@
 import os
 import json
 import pytesseract
-
 from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
